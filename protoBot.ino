@@ -22,14 +22,10 @@ void setup()
     Serial.begin(115200);
     protoBot.init();
     Serial.println("Robot init completed.");
-    protoBot.run();
-    Serial.println(protoBot.review());
-    Serial.println(protoBot.review());
 }
 
 void loop()
 {
-//    Serial.println(protoBot.review());
-    
+  protoBot.run();
 }
 
