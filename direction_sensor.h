@@ -26,7 +26,7 @@ public:
     virtual void setDirection(unsigned int angle) {
         angle = constrain(angle, 15, 175);
         write(angle);
-        delay(200);
+        delay(20);
     }
 private:
     int attachPin;
