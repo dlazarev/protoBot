@@ -36,8 +36,8 @@ class DistanceSensorDriver {
 public:
     DistanceSensorDriver(int triggerPin, int echoPin) : sonar(triggerPin, echoPin, MAX_DISTANCE) {}
 
-    virtual unsigned int getDistance() {
-        int distance = sonar.ping_cm();
+        unsigned int getDistance() {
+        int distance = sonar.ping_median(7) / US_ROUNDTRIP_CM;
         if (distance < 0) return MAX_DISTANCE;
         return distance;
     }
@@ -47,11 +47,10 @@ private:
 
 class DirectionSensor : public ServoDriver, DistanceSensorDriver {
 public:
-    DirectionSensor(int triggerPin, int echoPin, int servoPin) : ServoDriver(servoPin), DistanceSensorDriver(triggerPin, echoPin), currentIndex(0) {
- //       angles[0] = 0; angles[1] = 45; angles[2] = 90; angles[3] = 135; angles[4] = 180;
-        
- //       setDirection(angles[currentIndex]);
- //       Serial.println("DirectionSensor init completed.");
+    DirectionSensor(int triggerPin, int echoPin, int servoPin) : ServoDriver(servoPin), DistanceSensorDriver(triggerPin, echoPin), currentIndex(0) {}
+    
+    unsigned int getDistance() {
+        return DistanceSensorDriver::getDistance();
     }
     
     virtual unsigned int getDirection() {
@@ -70,10 +69,10 @@ public:
                 direction = angles[currentIndex];
             }
         }
+        setDirection(90);
         return direction;
     }
 private:
-//    unsigned int angles[5];
     int currentIndex;
 };
 

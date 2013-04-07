@@ -23,10 +23,12 @@ public:
     rightMotor(_rightForward, _rightBack) {}
     
     void init() {
+        endTime = millis() + RUN_TIME * 1000;
         sonar.init();
         leftMotor.init();
         rightMotor.init();
         pinMode(13, OUTPUT);
+        move();
     }
     
     float battery() {
@@ -39,90 +41,83 @@ public:
         unsigned int dir = sonar.getDirection();
         return dir;
     }
+        
+    void stop() {
+        leftMotor.setSpeed(0);
+        rightMotor.setSpeed(0);
+        state = stateStopped;
+    }
+    
+    void move() {
+      leftMotor.setSpeed(76);
+      rightMotor.setSpeed(68);
+      state = stateMoving;
+    }
+    
+    bool obstacleAhead(unsigned int distance)
+    {
+        return (distance <= TOO_CLOSE);
+    }
+    
+    void turnLeft(unsigned long currentTime, unsigned long delta) {
+        leftMotor.setSpeed(-50);
+        rightMotor.setSpeed(50);
+        endStateTime = currentTime + delta;
+        state = stateTurning;
+    }
+    
+    void turnRight(unsigned long currentTime, unsigned long delta) {
+        leftMotor.setSpeed(50);
+        rightMotor.setSpeed(-50);
+        endStateTime = currentTime + delta;
+        state = stateTurning;
+    }
+    
+    bool doneTurning(unsigned long currentTime, unsigned int distance)
+    {
+        if (currentTime >= endStateTime)
+            return (distance > TOO_CLOSE);
+        return false;
+    }
     
     void run() {
-      checkBattery();  
-
-      int dir = review();
-      
-      switch(dir) {
-        case 0:
-          turnLeft90();
-          break;
-        case 45:
-          turnLeft45();
-          break;
-        case 90:
-          break;
-        case 135:
-          turnRight45();
-          break;
-        case 180:
-          turnRight90();  
-      }
-      leftMotor.setSpeed(50);
-      rightMotor.setSpeed(50);
-      delay(600);
+        checkBattery();
+        if (stopped())
+            return;
+        
+        unsigned long currentTime = millis();
+        int distance = sonar.getDistance();
+        
+        if (doneRunning(currentTime))
+            stop();
+        else if (moving()) {
+            if (obstacleAhead(distance))
+                turnLeft(currentTime, 60);
+        }
+        else if (turning()) {
+            if (doneTurning(currentTime, distance))
+                move();
+        }
     }
     
-    void stop() {
-      leftMotor.setSpeed(0);
-      rightMotor.setSpeed(0);
-    }
-    
-    void turnLeft90() {
-      leftMotor.setSpeed(0);
-      rightMotor.setSpeed(0);
-      delay(20);
-      leftMotor.setSpeed(-70);
-      rightMotor.setSpeed(70);
-      delay(340);
-      leftMotor.setSpeed(0);
-      rightMotor.setSpeed(0);
-    }
-      
-    void turnLeft45() {
-      leftMotor.setSpeed(0);
-      rightMotor.setSpeed(0);
-      delay(20);
-      leftMotor.setSpeed(-70);
-      rightMotor.setSpeed(70);
-      delay(180);
-      leftMotor.setSpeed(0);
-      rightMotor.setSpeed(0);
-    }
-      
-    void turnRight45() {
-      leftMotor.setSpeed(0);
-      rightMotor.setSpeed(0);
-      delay(20);
-      leftMotor.setSpeed(70);
-      rightMotor.setSpeed(-70);
-      delay(180);
-      leftMotor.setSpeed(0);
-      rightMotor.setSpeed(0);
-    }
-
-    void turnRight90() {
-      leftMotor.setSpeed(0);
-      rightMotor.setSpeed(0);
-      delay(20);
-      leftMotor.setSpeed(70);
-      rightMotor.setSpeed(-70);
-      delay(340);
-      leftMotor.setSpeed(0);
-      rightMotor.setSpeed(0);
-    }
-      
-      
 private:
     void checkBattery() {
       if (battery() < 6.0) digitalWrite(13, HIGH);
       else digitalWrite(13, LOW);
     }
     
+    bool moving() { return (state == stateMoving); }
+    bool turning() { return (state == stateTurning); }
+    bool stopped() { return (state == stateStopped); }
+    
+    bool doneRunning(unsigned long currentTime) { return (currentTime >= endTime); }
+    
     DirectionSensor sonar;
     Motor leftMotor;
     Motor rightMotor;
+    unsigned long endTime;
+    unsigned long endStateTime;
+    enum state_t { stateStopped, stateMoving, stateTurning };
+    state_t state;
 };
 #endif

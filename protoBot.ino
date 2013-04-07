@@ -1,5 +1,9 @@
 #include <Servo.h>
 #include <NewPing.h>
+
+#define RUN_TIME 30
+#define TOO_CLOSE 20
+
 #include "direction_sensor.h"
 #include "motor.h"
 #include "robot.h"
