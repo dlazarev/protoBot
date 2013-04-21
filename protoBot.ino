@@ -1,8 +1,8 @@
 #include <Servo.h>
 #include <NewPing.h>
 
-#define RUN_TIME 30
-#define TOO_CLOSE 20
+#define RUN_TIME 60
+#define TOO_CLOSE 15
 
 #include "direction_sensor.h"
 #include "motor.h"

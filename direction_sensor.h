@@ -26,7 +26,7 @@ public:
     virtual void setDirection(unsigned int angle) {
         angle = constrain(angle, 15, 175);
         write(angle);
-        delay(20);
+        delay(160);
     }
 private:
     int attachPin;
@@ -37,7 +37,7 @@ public:
     DistanceSensorDriver(int triggerPin, int echoPin) : sonar(triggerPin, echoPin, MAX_DISTANCE) {}
 
         unsigned int getDistance() {
-        int distance = sonar.ping_median(7) / US_ROUNDTRIP_CM;
+        int distance = sonar.ping_median(5) / US_ROUNDTRIP_CM;
         if (distance < 0) return MAX_DISTANCE;
         return distance;
     }

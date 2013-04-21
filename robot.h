@@ -48,9 +48,14 @@ public:
         state = stateStopped;
     }
     
+    void pause() {
+        leftMotor.setSpeed(0);
+        rightMotor.setSpeed(0);
+        state = statePaused;
+    }
     void move() {
-      leftMotor.setSpeed(76);
-      rightMotor.setSpeed(68);
+      leftMotor.setSpeed(85);
+      rightMotor.setSpeed(70);
       state = stateMoving;
     }
     
@@ -81,23 +86,35 @@ public:
     }
     
     void run() {
+        Serial.print("state=");
+        Serial.println(state);
         checkBattery();
         if (stopped())
             return;
         
         unsigned long currentTime = millis();
         int distance = sonar.getDistance();
-        
+        Serial.print("distance=");
+        Serial.println(distance);
         if (doneRunning(currentTime))
             stop();
         else if (moving()) {
-            if (obstacleAhead(distance))
-                turnLeft(currentTime, 60);
+            if (obstacleAhead(distance)) {
+                pause();
+                int direction = sonar.getDirection() - 90;
+                Serial.print("direction=");
+                Serial.println(direction);
+                if (direction < 0)
+                    turnLeft(currentTime, -direction);
+                else if (direction > 0)
+                    turnRight(currentTime, direction);
+            }
         }
         else if (turning()) {
             if (doneTurning(currentTime, distance))
                 move();
         }
+        else if (paused()) move();
     }
     
 private:
@@ -109,6 +126,7 @@ private:
     bool moving() { return (state == stateMoving); }
     bool turning() { return (state == stateTurning); }
     bool stopped() { return (state == stateStopped); }
+    bool paused() { return (state == statePaused); }
     
     bool doneRunning(unsigned long currentTime) { return (currentTime >= endTime); }
     
@@ -117,7 +135,7 @@ private:
     Motor rightMotor;
     unsigned long endTime;
     unsigned long endStateTime;
-    enum state_t { stateStopped, stateMoving, stateTurning };
+    enum state_t { stateStopped, stateMoving, stateTurning, statePaused };
     state_t state;
 };
 #endif
