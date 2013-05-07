@@ -6,6 +6,7 @@
 
 #include "direction_sensor.h"
 #include "motor.h"
+#include "led_3color.h"
 #include "robot.h"
 
 #define SERVO_PIN 10

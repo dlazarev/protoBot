@@ -49,12 +49,14 @@ public:
     }
     
     void pause() {
+        colorLed.off();
         leftMotor.setSpeed(0);
         rightMotor.setSpeed(0);
         state = statePaused;
     }
     void move() {
-      leftMotor.setSpeed(85);
+        colorLed.blue();
+        leftMotor.setSpeed(85);
       rightMotor.setSpeed(70);
       state = stateMoving;
     }
@@ -65,15 +67,17 @@ public:
     }
     
     void turnLeft(unsigned long currentTime, unsigned long delta) {
-        leftMotor.setSpeed(-50);
-        rightMotor.setSpeed(50);
+        colorLed.green();
+        leftMotor.setSpeed(-200);
+        rightMotor.setSpeed(-50);
         endStateTime = currentTime + delta;
         state = stateTurning;
     }
     
     void turnRight(unsigned long currentTime, unsigned long delta) {
-        leftMotor.setSpeed(50);
-        rightMotor.setSpeed(-50);
+        colorLed.red();
+        leftMotor.setSpeed(-50);
+        rightMotor.setSpeed(-200);
         endStateTime = currentTime + delta;
         state = stateTurning;
     }
@@ -89,6 +93,7 @@ public:
         Serial.print("state=");
         Serial.println(state);
         checkBattery();
+        
         if (stopped())
             return;
         
@@ -133,6 +138,7 @@ private:
     DirectionSensor sonar;
     Motor leftMotor;
     Motor rightMotor;
+    Led_3color colorLed;
     unsigned long endTime;
     unsigned long endStateTime;
     enum state_t { stateStopped, stateMoving, stateTurning, statePaused };
